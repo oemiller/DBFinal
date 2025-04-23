@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DB Final</title>
+</head>
+<body>
+    <h1>Energy Consumption</h1>
+    <ul>
+        {% for item in items %}
+          <h2>{{ item[0] }}</h2>
+          {% for name in column_names %}
+            <li>{{ name }} {{ item[loop.index0] }}</li>
+          {% endfor %}
+        {% endfor %}
+    </ul>
+</body>
+</html>
