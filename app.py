@@ -66,12 +66,16 @@ def update_col_post():
         month_yr_in = request.form.get('month_year')
         data=request.form
         print("attempting to update entry where month_year =",month_yr_in)
+        skip = True
         for item in data.items():
             colname = item[0]
             colval = item[1]
-            if colname != "month_year" and not check_numeric(colval):
+            if not skip and not check_numeric(colval) and not (colval is None or colval == ''):
                 return(render_template("update_form_2.html"))
-            print("DATA:", colname, "=", colval)
+            if not skip and not (colval is None or colval == ''):
+                print("DATA:", colname, "=", colval)
+            if skip:
+                skip = not skip
         return render_template("index.html")
         
 
