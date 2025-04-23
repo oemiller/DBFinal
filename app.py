@@ -1,8 +1,9 @@
-from flask import Flask, render_template
-from flask import request
+from flask import Flask, render_template, send_file, request
 import pg8000
 import os
-
+import matplotlib.pyplot as plt
+from io import BytesIO
+from matplotlib.colors import CSS4_COLORS
 app = Flask(__name__)
 
 def get_column_names(cursor):
@@ -11,10 +12,48 @@ def get_column_names(cursor):
         column_names.append(column[0])
     return column_names
 
+def get_data_by_column(all_rows):
+    num_rows = len(all_rows)
+    num_cols = len(all_rows[0])
+    transposed = [[]] * num_cols
+    for i in range(len(transposed)):
+        transposed[i] = []
+    for i in range(num_rows):
+        for j in range(num_cols):
+            try:
+                transposed[j].append(all_rows[i][j])
+            except:
+                print("ERRORED ON", i, j)
+    return transposed
 
 @app.route("/")
 def index():
     return render_template("index.html", param="")
+
+@app.route('/plot')
+def plot():
+    cursor = database_connection.cursor()
+    cursor.execute("SELECT * FROM shared_production_and_consumption_by_source") 
+    all_rows = cursor.fetchall()
+    column_names = get_column_names(cursor)
+    cursor.close()
+    columns = get_data_by_column(all_rows)
+    x = range(len(columns[0])) 
+    plt.figure(figsize=(12, 8))
+    for i in range(1, len(columns)):
+        color = list(CSS4_COLORS.keys())[i]
+        plt.plot(x, columns[i], label=column_names[i], color=color, linestyle='--', marker='.')
+    plt.title("Production and Consumption by Source")
+    plt.xlabel("Months since Jan 1973")
+    plt.ylabel("Units of Energy (quadrillion BTUs)")
+    plt.legend()
+    plt.grid(True)
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plt.close()
+    return send_file(buf, mimetype='image/png')
+
 
 @app.route("/full_table")
 def full_table():
@@ -101,7 +140,6 @@ if __name__ == "__main__":
         host=host,
         database=database
     )
-    print(type(database_connection))
     cursor = database_connection.cursor()
     cursor.execute("SET search_path TO group39") 
     cursor.close()
