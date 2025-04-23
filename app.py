@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, request
 import pg8000
 import os
 import matplotlib.pyplot as plt
@@ -67,6 +67,53 @@ def full_table():
 @app.route("/test")
 def test_page():
     return render_template("index.html", param="")
+
+@app.get("/year_data")
+def year_get():
+    return render_template("year_form.html")
+
+@app.post("/year_data")
+def year_post():
+    if request.method == 'POST':
+        year_in = request.form.get('year')
+        query = """
+            SELECT * FROM shared_production_and_consumption_by_source
+            WHERE month_year LIKE %s
+        """
+        cursor = database_connection.cursor()
+        cursor.execute(query, (str(year_in)[:4] + '%',))
+        all = cursor.fetchall()
+        column_names = get_column_names(cursor)
+        cursor.close()
+        return render_template("full_table.html", column_names=column_names, items=all)
+
+@app.get("/update_col")
+def update_col_get():
+    return render_template("update_form_2.html")
+
+@app.post("/update_col")
+def update_col_post():
+
+    def check_numeric(x):
+        try: 
+            a = float(x)
+        except:
+            return False
+        return True
+    
+    if request.method == 'POST':
+        month_yr_in = request.form.get('month_year')
+        data=request.form
+        print("attempting to update entry where month_year =",month_yr_in)
+        for item in data.items():
+            colname = item[0]
+            colval = item[1]
+            if colname != "month_year" and not check_numeric(colval):
+                return(render_template("update_form_2.html"))
+            print("DATA:", colname, "=", colval)
+        return render_template("index.html")
+        
+
 
 if __name__ == "__main__":
     try:
