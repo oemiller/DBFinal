@@ -48,6 +48,32 @@ def year_post():
         cursor.close()
         return render_template("full_table.html", column_names=column_names, items=all)
 
+@app.get("/update_col")
+def update_col_get():
+    return render_template("update_form_2.html")
+
+@app.post("/update_col")
+def update_col_post():
+
+    def check_numeric(x):
+        try: 
+            a = float(x)
+        except:
+            return False
+        return True
+    
+    if request.method == 'POST':
+        month_yr_in = request.form.get('month_year')
+        data=request.form
+        print("attempting to update entry where month_year =",month_yr_in)
+        for item in data.items():
+            colname = item[0]
+            colval = item[1]
+            if colname != "month_year" and not check_numeric(colval):
+                return(render_template("update_form_2.html"))
+            print("DATA:", colname, "=", colval)
+        return render_template("index.html")
+        
 
 
 if __name__ == "__main__":
