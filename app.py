@@ -37,8 +37,12 @@ def year_get():
 def year_post():
     if request.method == 'POST':
         year_in = request.form.get('year')
+        query = """
+            SELECT * FROM shared_production_and_consumption_by_source
+            WHERE month_year LIKE %s
+        """
         cursor = database_connection.cursor()
-        cursor.execute("SELECT * FROM shared_production_and_consumption_by_source WHERE month_year LIKE \'"+str(year_in)+"%\'") 
+        cursor.execute(query, (str(year_in)[:4] + '%',))
         all = cursor.fetchall()
         column_names = get_column_names(cursor)
         cursor.close()
