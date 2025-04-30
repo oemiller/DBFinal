@@ -1,21 +1,27 @@
-
-TODO:
-
-1. set up flask app
-2. set up way for flask app to talk to the database
-3. come up with a nice way to visualize the data
-
 # How to run.
 
 ## Install the dependencies manually or use the provided nix shell
-* python3 (requests, flask, pg8000)
+* python3 (flask, pg8000, matplotlib)
 
-execute the following
+## Set up your environement file
+* copy .env_template to .env
+* add your credentials
+
+## Execute the following in your terminal
 ```
-$ flask run
+$ source .env && python app.py
+*****************************************************************
+logged in as oemiller to database csci403 on server ada.mines.edu
+*****************************************************************
+ * Serving Flask app 'app'
  * Debug mode: off
 WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on http://127.0.0.1:5000
 Press CTRL+C to quit
 ```
-visit the site in your browser
+
+## Visit the site in your browser and enjoy the following endpoints
+* /full_table | all data in the table visible from one page
+* /year_data | find data from a specific year
+* /update_col | update rows in the table
+* /plot | displays a graph with energy use by type
