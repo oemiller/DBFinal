@@ -116,7 +116,6 @@ def update_col_post():
             if skip:
                 skip = not skip
         return render_template("index.html")
-        
 
 
 if __name__ == "__main__":
