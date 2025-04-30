@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 from io import BytesIO
 from matplotlib.colors import CSS4_COLORS
+import sys
 app = Flask(__name__)
 
 def get_column_names(cursor):
@@ -28,7 +29,12 @@ def get_data_by_column(all_rows):
 
 @app.route("/")
 def index():
-    return render_template("index.html", param="")
+    cursor = database_connection.cursor()
+    cursor.execute("SELECT * FROM shared_production_and_consumption_by_source") 
+    all = cursor.fetchall()
+    column_names = get_column_names(cursor)
+    cursor.close()
+    return render_template("full_table.html", column_names=column_names, items=all)
 
 @app.route('/plot')
 def plot():
@@ -80,8 +86,9 @@ def year_post():
             SELECT * FROM shared_production_and_consumption_by_source
             WHERE month_year LIKE %s
         """
+        params = [f"{year_in}%"]
         cursor = database_connection.cursor()
-        cursor.execute(query, (str(year_in)[:4] + '%',))
+        cursor.execute(query, params)
         all = cursor.fetchall()
         column_names = get_column_names(cursor)
         cursor.close()
@@ -102,21 +109,49 @@ def update_col_post():
         return True
     
     if request.method == 'POST':
-        month_yr_in = request.form.get('month_year')
+        sendquer = False
+        month_yr_in = request.form.get('month_year')    
         data=request.form
         print("attempting to update entry where month_year =",month_yr_in)
         skip = True
+        query_unbuilt = "UPDATE shared_production_and_consumption_by_source SET "
         for item in data.items():
             colname = item[0]
             colval = item[1]
+            if colname == 'commit':
+                sendquer = (colval == 'yes')
+                break
             if not skip and not check_numeric(colval) and not (colval is None or colval == ''):
                 return(render_template("update_form_2.html"))
-            if not skip and not (colval is None or colval == ''):
-                print("DATA:", colname, "=", colval)
+            if not skip and not ((colval is None or colval == '') ^ (not check_numeric(colval))):
+               query_unbuilt += f"{colname} = {colval},"
             if skip:
                 skip = not skip
-        return render_template("index.html")
 
+                
+        query_built = query_unbuilt[:-1] + " WHERE month_year = %s;"
+        params = params = [f"{month_yr_in}"]
+        print(query_built)
+        if not sendquer: None
+        else: 
+            cursor = database_connection.cursor()
+            cursor.execute(query_built, params)
+            database_connection.commit()
+        return render_template("index.html")   
+
+
+@app.get("/remove_year")
+def remove_year_get():
+    return render_template("delete_form.html")    
+
+@app.post("/remove_year")
+def remove_col_post():
+    if request.method == 'POST':
+        month_yr_in = request.form.get('month_year')
+        params = [f"{month_yr_in}"]
+        query_del = "DELETE FROM shared_production_and_consumption_by_source WHERE month_year = %s"
+        print(query_del)
+        return render_template("index.html")
 
 if __name__ == "__main__":
     try:
@@ -139,7 +174,13 @@ if __name__ == "__main__":
         host=host,
         database=database
     )
+    port = 5000
+    try:
+        port = int(sys.argv[1])
+    except:
+        pass 
+
     cursor = database_connection.cursor()
     cursor.execute("SET search_path TO group39") 
     cursor.close()
-    app.run(debug=False)
+    app.run(debug=False, port = port)
