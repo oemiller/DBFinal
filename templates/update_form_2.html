@@ -11,7 +11,7 @@
     function formatMonthYear() {
       const month = document.getElementById("month").value;
       const year = document.getElementById("year").value;
-      document.getElementById("month_year").value = month + " " + year;
+      document.getElementById("month_year").value = year + " " + month;
     }
 
     function validateForm(event) {
@@ -49,6 +49,7 @@
 </head>
 <body>
   <h1>Update Table Entry</h1>
+  
   <form method="POST" action="" onsubmit="return validateForm(event)">
     <!-- Month and Year Dropdowns -->
     <label for="month">Month:</label>
@@ -119,6 +120,11 @@
     <label for="total_renewable_energy_consumption">Total Renewable Energy Consumption:</label>
     <input type="text" id="total_renewable_energy_consumption" name="total_renewable_energy_consumption"><br><br>
 
+    <label for="commit">Commit:</label>
+    <select id="commit" name="commit">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select><br><br>
     <button type="submit">Update</button>
   </form>
 </body>
