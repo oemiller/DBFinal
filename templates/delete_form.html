@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Table Entry</title>
+  <script>
+    function isNumeric(value) {
+      return /^\d+(\.\d+)?$/.test(value);
+    }
+
+    function formatMonthYear() {
+      const month = document.getElementById("month").value;
+      const year = document.getElementById("year").value;
+      document.getElementById("month_year").value = year + " " + month;
+    }
+
+  </script>
+</head>
+<body>
+  <h1>Update Table Entry</h1>
+  
+  <form method="POST" action="" onsubmit="return formatMonthYear()">
+    <!-- Month and Year Dropdowns -->
+    <label for="month">Month:</label>
+    <select id="month">
+      <option>January</option>
+      <option>February</option>
+      <option>March</option>
+      <option>April</option>
+      <option>May</option>
+      <option>June</option>
+      <option>July</option>
+      <option>August</option>
+      <option>September</option>
+      <option>October</option>
+      <option>November</option>
+      <option>December</option>
+    </select>
+
+    <label for="year">Year:</label>
+    <select id="year">
+      <!-- Use static or template-generated options -->
+      <script>
+        for (let y = 1979; y <= 2025; y++) {
+          document.write(`<option>${y}</option>`);
+        }
+      </script>
+    </select>
+
+    <input type="hidden" id="month_year" name="month_year"><br><br>
+
+    <label for="commit">Commit:</label>
+    <select id="commit" name="commit">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select><br><br>
+    <button type="submit">Update</button>
+  </form>
+</body>
+</html>
+
