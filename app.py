@@ -29,7 +29,12 @@ def get_data_by_column(all_rows):
 
 @app.route("/")
 def index():
-    return render_template("index.html", param="")
+    cursor = database_connection.cursor()
+    cursor.execute("SELECT * FROM shared_production_and_consumption_by_source") 
+    all = cursor.fetchall()
+    column_names = get_column_names(cursor)
+    cursor.close()
+    return render_template("full_table.html", column_names=column_names, items=all)
 
 @app.route('/plot')
 def plot():
@@ -132,7 +137,7 @@ def update_col_post():
             cursor = database_connection.cursor()
             cursor.execute(query_built, params)
             database_connection.commit()
-        return render_template("index.html")
+        return render_template("index.html")   
 
 
 @app.get("/remove_year")
